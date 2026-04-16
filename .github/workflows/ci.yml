@@ -49,7 +49,7 @@ jobs:
       - name: Build zipapp (.pyz)
         run: |
           mkdir -p build/app
-          cp -r main.py config.py __main__.py .env.example build/app/
+          cp -r main.py config.py __main__.py build/app/
           cp -r models fetchers processors generators build/app/
           python -m zipapp build/app -o dist/vid-creator.pyz -p "/usr/bin/env python3"
           mkdir -p dist
