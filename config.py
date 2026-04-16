@@ -1,19 +1,39 @@
 """
 Central configuration for the Trending Video Creator application.
-Loads environment variables and defines application-wide defaults.
+Loads API keys from keyring (Windows Credential Manager), falling back
+to environment variables / .env file.
 """
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
 
-# Load .env file from the project root
-load_dotenv(dotenv_path=Path(__file__).parent / ".env")
+try:
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path=Path(__file__).parent / ".env")
+except ImportError:
+    pass
+
+try:
+    import keyring
+    _HAS_KEYRING = True
+except ImportError:
+    _HAS_KEYRING = False
+
+SERVICE_NAME = "vid-creator"
+
+
+def _get_key(name: str) -> str:
+    """Get an API key: keyring first, then env var, then empty string."""
+    if _HAS_KEYRING:
+        val = keyring.get_password(SERVICE_NAME, name)
+        if val:
+            return val
+    return os.getenv(name, "")
 
 
 # --- API Keys ---
-YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+YOUTUBE_API_KEY = _get_key("YOUTUBE_API_KEY")
+GOOGLE_API_KEY = _get_key("GOOGLE_API_KEY")
 
 # --- YouTube Settings ---
 YOUTUBE_REGION_CODE = os.getenv("YOUTUBE_REGION_CODE", "IN")
