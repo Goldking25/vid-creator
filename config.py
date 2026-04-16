@@ -25,9 +25,12 @@ SERVICE_NAME = "vid-creator"
 def _get_key(name: str) -> str:
     """Get an API key: keyring first, then env var, then empty string."""
     if _HAS_KEYRING:
-        val = keyring.get_password(SERVICE_NAME, name)
-        if val:
-            return val
+        try:
+            val = keyring.get_password(SERVICE_NAME, name)
+            if val:
+                return val
+        except Exception:
+            pass  # No keyring backend (headless Linux, CI, etc.)
     return os.getenv(name, "")
 
 
